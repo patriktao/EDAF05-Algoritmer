@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="EDAF05-Algoritmer:jar">
+    <output-path>$PROJECT_DIR$/2wordladders/out</output-path>
+    <root id="archive" name="EDAF05-Algoritmer.jar">
+      <element id="module-output" name="EDAF05-Algoritmer" />
+    </root>
+  </artifact>
+</component>
