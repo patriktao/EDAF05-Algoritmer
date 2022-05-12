@@ -16,13 +16,6 @@ public class MakingFriends2 {
         this.edges = parser.edges;
         this.nodes = parser.nodes;
         createGraph();
-        /*
-         * for (ArrayList<Edge> list : graph) {
-         * for (Edge e : list) {
-         * System.out.println(e.from + "-" + e.to);
-         * }
-         * }
-         */
         primsAlgorithm();
     }
 
@@ -46,10 +39,7 @@ public class MakingFriends2 {
         PriorityQueue<Edge> queue = new PriorityQueue<>((e1, e2) -> e1.weight - e2.weight);
         queue.addAll(graph.get(0)); // Lägger till alla kanter från nod 0.
         visited.add(queue.peek().from); // besöker första noden
-        
         int distance = 0;
-        // System.out.println("Initial Queue:" + queue.toString());
-
         while (!queue.isEmpty()) {
             Edge edge = queue.poll();
             if (visited.contains(edge.from) && visited.contains(edge.to)) {
