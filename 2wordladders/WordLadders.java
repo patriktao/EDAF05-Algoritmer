@@ -15,7 +15,7 @@ public class WordLadders {
         this.pairs = parser.getPairs();
         this.words = parser.getWords();
 
-        // Create NeighborList
+        // creates a list of neighbour for every word we have
         createNeighborList();
 
         // Calculate shortest path between two words
@@ -29,14 +29,32 @@ public class WordLadders {
         }
     }
 
+    private List<String> getNeighborList(String s) {
+        char[] array = s.substring(1).toCharArray();
+        Arrays.sort(array);
+        return neighborList.get(String.valueOf(array));
+    }
+
     private void createNeighborList() {
         for (String s : words) {
+            /* by sorting them we can compare strings easier */
             char[] array = s.toCharArray();
             Arrays.sort(array);
             String sortedArray = String.valueOf(array);
             for (int i = 0; i < 5; i++) {
+                // draw an arc only if the last four letters are present
                 String rep = sortedArray.substring(0, i) + sortedArray.substring(i + 1);
-                neighborList.computeIfAbsent(rep, k -> new LinkedList<>());
+                /*
+                 * inptu
+                 * i = 0: = nptu
+                 * i = 1: i + ptu = iptu
+                 * i = 2: in + tu = intu
+                 * i = 3: inp + u = inpt
+                 * i = 4: = inpt
+                 */
+                // Create new list for each new neighbor node, if there isn't already.
+                neighborList.computeIfAbsent(rep, e -> new LinkedList<>());
+                // retrieve the list and add the word as neighbor.
                 List<String> neighbours = neighborList.get(rep);
                 if (neighbours != null) {
                     neighbours.add(s);
@@ -48,6 +66,7 @@ public class WordLadders {
     private int getSize(HashMap<String, String> pred, String t) {
         int counter = -1;
         if (pred.get(t) != null) {
+            //start at string t and loop back each node to count the size of graph.
             for (String str = t; str != null; str = pred.get(str)) {
                 counter++;
             }
@@ -55,29 +74,23 @@ public class WordLadders {
         return counter;
     }
 
-    private List<String> getNeighborList(String s) {
-        char[] ar = s.substring(1).toCharArray();
-        Arrays.sort(ar);
-        return neighborList.get(String.valueOf(ar));
-    }
-
     public int bfs(String s, String t) {
         HashMap<String, String> pred = new HashMap<>();
         Map<String, Boolean> visited = new HashMap<>();
-        Queue<String> q = new LinkedList<>(); // new list q containing s, the first one we visit
-        q.add(s);
-        visited.put(s, true);
+        Queue<String> q = new LinkedList<>(); // new list q containing node s, the first one we visit
+        q.add(s); // we are visiting that node first
+        visited.put(s, true); // first node we visit
         if (s.equals(t)) { // return if already at destination
             return 0;
         }
         while (!q.isEmpty()) {
             String v = q.poll(); // take out the first element form q
             for (String w : getNeighborList(v)) {
-                if (visited.get(w) == null) {
+                if (visited.get(w) == null) { // if the neighbor string is not visited yet
                     visited.put(w, true);
-                    q.add(w);
-                    pred.put(w, v);
-                    if (w.equals(t)) {
+                    q.add(w); // we go to that node by adding to the queue
+                    pred.put(w, v); // now this new node and previous node are connected
+                    if (w.equals(t)) { // if that node is the string t we are looking for   
                         return getSize(pred, t);
                     }
                 }
