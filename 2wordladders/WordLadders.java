@@ -36,9 +36,6 @@ public class WordLadders {
             String sortedArray = String.valueOf(array);
             for (int i = 0; i < 5; i++) {
                 String rep = sortedArray.substring(0, i) + sortedArray.substring(i + 1);
-                // If the specified key is not already associated with a value (or is mapped to
-                // null), attempts to compute its value using the given mapping function and
-                // enters it into this map unless null.
                 neighborList.computeIfAbsent(rep, k -> new LinkedList<>());
                 List<String> neighbours = neighborList.get(rep);
                 if (neighbours != null) {

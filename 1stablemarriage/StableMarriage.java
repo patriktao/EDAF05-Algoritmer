@@ -1,11 +1,12 @@
 import java.util.*;
+import java.io.*;
 
 public class StableMarriage {
 
     private Map<Integer, LinkedList<Integer>> manPref;
     private Map<Integer, LinkedList<Integer>> womPref;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         new StableMarriage().run();
     }
 
@@ -76,7 +77,6 @@ class Parser {
             int person = scan.nextInt();
             LinkedList<Integer> prefList = new LinkedList<>();
             for (int j = 0; j < peopleOfEachGender; j++) {
-                // start index 0
                 prefList.add(scan.nextInt());
             }
 
@@ -138,7 +138,7 @@ class PairList {
                 return p.man;
             }
         }
-        System.out.println("Cant    find Woman in getMan");
+        System.out.println("Cant find Woman in getMan");
         return -1;
     }
 
