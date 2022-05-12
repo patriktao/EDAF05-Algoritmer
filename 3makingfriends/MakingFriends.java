@@ -1,14 +1,14 @@
 
 import java.util.*;
 
-public class MakingFriends2 {
+public class MakingFriends {
 
     private List<Edge> edges;
     private List<Integer> nodes;
     private ArrayList<ArrayList<Edge>> graph = new ArrayList<>();
 
     public static void main(String[] args) {
-        new MakingFriends2().run();
+        new MakingFriends().run();
     }
 
     public void run() {
@@ -20,17 +20,12 @@ public class MakingFriends2 {
     }
 
     private void createGraph() {
-        // skapa tomma arrays
         for (int i = 0; i < nodes.size(); i++) {
             graph.add(new ArrayList<>());
         }
-        // lägga till edges i arrayen
         for (Edge e : edges) {
-            int from = e.from;
-            int to = e.to;
-            int weight = e.weight;
-            graph.get(from - 1).add(e);
-            graph.get(to - 1).add(new Edge(to, from, weight));
+            graph.get(e.from - 1).add(e);
+            graph.get(e.to - 1).add(new Edge(e.to, e.from, e.weight));
         }
     }
 
@@ -67,11 +62,6 @@ class Edge {
         this.from = from;
         this.to = to;
         this.weight = weight;
-    }
-
-    @Override
-    public String toString() {
-        return from + "-" + to;
     }
 }
 
