@@ -44,7 +44,7 @@ public class WordLadders {
             for (int i = 0; i < 5; i++) {
                 // draw an arc only if the last four letters are present
                 String rep = sortedArray.substring(0, i) + sortedArray.substring(i + 1);
-                /*
+                /* putin
                  * inptu
                  * i = 0: = nptu
                  * i = 1: i + ptu = iptu

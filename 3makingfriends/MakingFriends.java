@@ -47,7 +47,7 @@ public class MakingFriends {
                 }
                 visited.add(edge.to);
                 distance += edge.weight;
-            }
+            }   
         }
         System.out.println(distance);
     }
