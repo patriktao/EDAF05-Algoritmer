@@ -36,50 +36,40 @@ public class ClosestPair {
     }
 
     public double closest(Point[] Px, int size) {
-        if (size == 1) {
+        if (size <= 1) {
             return Double.MAX_VALUE;
         } else if (size == 2) {
             return getDistance(Px[0], Px[1]);
         }
-
         int mid = size / 2;
 
-        // Divide Px to left and right
+        // Divide Px to left and right, find minimum distance from l and r array
         Point[] Lx = Arrays.copyOfRange(Px, 0, mid);
         Point[] Rx = Arrays.copyOfRange(Px, mid + 1, size);
+        double leftDelta = closest(Lx, Lx.length);
+        double rightDelta = closest(Rx, Rx.length);
+        double delta = Math.min(leftDelta, rightDelta);
 
-        // Find minimum distance from l and r array
-        double deltaL = closest(Lx, Lx.length);
-        double deltaR = closest(Rx, Rx.length);
-        double delta = Math.min(deltaL, deltaR);
-
-        // Create sY, add the points of sY that are within delta
-        ArrayList<Point> sY = new ArrayList<>();
-
-        // Mid Point to compare to
+        // Create s, add the points of s that are within delta
+        ArrayList<Point> s = new ArrayList<>();
         double midPoint = Rx[0].x;
-        for (int i = 0; i < sY.size(); i++) {
-            if (midPoint - delta < sortedY[i].x || midPoint + delta > sortedY[i].x) {
-                sY.add(sortedX[i]);
+        for (int i = 0; i < sortedY.length; i++) {
+            double negThres = midPoint - delta;
+            double posThres = midPoint + delta;
+            if (sortedY[i].x > negThres && sortedY[i].x < posThres) {
+                s.add(sortedY[i]);
             }
         }
 
-        // Sort sY on y
-        sY.sort((p1, p2) -> p1.y - p2.y);
-
-        int C;
-        // Let's determine the closests distance
-        for (int i = 0; i < sY.size() - 1; i++) {
-            // bestämma C
-            C = Math.min(sY.size() - 1, 16);
-            for (int j = i + 1; j < i + C; j++) {
-                double distance = getDistance(sY.get(i), sY.get(j));
-                if (distance < delta) {
-                    delta = distance;
+        s.sort((p1, p2) -> p1.y - p2.y);
+        for (int i = 0; i < s.size(); i++) {
+            for (int j = i + 1; j < Math.min(s.size(), i + 15); j++) {
+                double dist = getDistance(s.get(i), s.get(j));
+                if (dist < delta) {
+                    delta = dist;
                 }
             }
         }
-
         return delta;
     }
 }
