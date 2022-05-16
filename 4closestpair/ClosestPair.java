@@ -21,22 +21,13 @@ public class ClosestPair {
         printResult(closest(sortedX, sortedY, points.length));
     }
 
-    /* Räknar avstånd mellan p1 och p2 genom ren matte */
     private double getDistance(Point p1, Point p2) {
         return Math.hypot(p1.x - p2.x, p1.y - p2.y);
     }
 
-    // Print result with 6 decimals
     private void printResult(double f) {
         String s = String.format(java.util.Locale.US, "%.6f", f);
         System.out.println(s);
-    }
-
-    private void arrayString(Point[] arr) {
-        System.out.println("Sorted");
-        for (Point p : arr) {
-            System.out.println(p.toString());
-        }
     }
 
     public double closest(Point[] Px, Point[] Py, int size) {
@@ -59,7 +50,7 @@ public class ClosestPair {
         double rightDelta = closest(Rx, Ry, Rx.length);
         // Choose the shortest distance between points
         double delta = Math.min(leftDelta, rightDelta);
-        // Create s, add the points of s that are within delta
+        // Create s, add the points of PY that are within delta
         ArrayList<Point> s = new ArrayList<>();
         double midX = Rx[0].x;
         for (Point p : Py) {
@@ -68,7 +59,6 @@ public class ClosestPair {
                 s.add(p);
             }
         }
-        // bruteforce
         for (int i = 0; i < s.size(); i++) {
             for (int j = i + 1; j < Math.min(s.size(), i + 15); j++) {
                 double dist = getDistance(s.get(i), s.get(j));
