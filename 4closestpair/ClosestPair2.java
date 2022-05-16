@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
-public class ClosestPair {
+public class ClosestPair2 {
 
     public static void main(String[] args) {
         new ClosestPair().run();
@@ -15,10 +15,8 @@ public class ClosestPair {
 
     private void closest_points(Point[] points) {
         Point[] sortedX = points.clone();
-        Point[] sortedY = points.clone();
         Arrays.sort(sortedX, (p1, p2) -> p2.x - p1.x); // O(nlog(n))
-        Arrays.sort(sortedY, (p1, p2) -> p2.y - p1.y);
-        printResult(closest(sortedX, sortedY, points.length));
+        printResult(closest(sortedX, 0, points.length - 1));
     }
 
     /* Räknar avstånd mellan p1 och p2 genom ren matte */
@@ -32,42 +30,37 @@ public class ClosestPair {
         System.out.println(s);
     }
 
-    private void arrayString(Point[] arr) {
-        System.out.println("Sorted");
-        for (Point p : arr) {
-            System.out.println(p.toString());
-        }
-    }
-
-    public double closest(Point[] Px, Point[] Py, int size) {
-        if (size <= 1) {
+    public double closest(Point[] Px, int start, int stop) {
+        // base cases
+        if (stop <= start) {
             return Double.MAX_VALUE;
-        } else if (size == 2) {
-            return getDistance(Px[0], Px[1]);
         }
-        int mid = size / 2;
-        // Divide Px to left and right
-        // en lista likadan som x sorterad på y
-        Point[] Lx = Arrays.copyOfRange(Px, 0, mid);
-        Point[] Ly = Arrays.copyOfRange(Px, 0, mid);
-        Point[] Rx = Arrays.copyOfRange(Px, mid + 1, size);
-        Point[] Ry = Arrays.copyOfRange(Px, mid + 1, size);
-        Arrays.sort(Ly, (p1, p2) -> p2.y - p1.y);
-        Arrays.sort(Ry, (p1, p2) -> p2.y - p1.y);
-        // Recursion: Find Minimum Distance From L and R Array
-        double leftDelta = closest(Lx, Ly, Lx.length);
-        double rightDelta = closest(Rx, Ry, Rx.length);
-        // Choose the shortest distance between points
+
+        int mid = start + (stop - start) / 2;
+        // Recursion: find minimum distance from l and r array
+        double leftDelta = closest(Px, start, mid);
+        double rightDelta = closest(Px, mid + 1, stop);
         double delta = Math.min(leftDelta, rightDelta);
+
         // Create s, add the points of s that are within delta
         ArrayList<Point> s = new ArrayList<>();
-        double midX = Rx[0].x;
-        for (Point p : Py) {
-            double dist = Math.abs(midX - p.x);
-            if (dist < delta) {
-                s.add(p);
+
+        for (int i = mid; i <= stop; i++) {
+            if (Math.abs(Px[i].x - Px[mid].x) < delta) {
+                s.add(Px[i]);   
+            } else {
+                break;
             }
         }
+
+        for (int i = mid - 1; i > start; i--) {
+            if (Math.abs(Px[i].x - Px[mid].x) < delta) {
+                s.add(Px[i]);
+            } else {
+                break;
+            }
+        }
+        s.sort((p1, p2) -> p2.y - p1.y);
         // bruteforce
         for (int i = 0; i < s.size(); i++) {
             for (int j = i + 1; j < Math.min(s.size(), i + 15); j++) {
