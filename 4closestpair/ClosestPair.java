@@ -47,7 +47,7 @@ public class ClosestPair {
         Arrays.sort(Ry, (p1, p2) -> p2.y - p1.y);
         // Recursion: Find Minimum Distance From L and R Array
         double leftDelta = closest(Lx, Ly, Lx.length); 
-        double rightDelta = closest(Rx, Ry, Rx.length);
+        double rightDelta = closest(Rx, Ry, Rx.length);
         // Choose the shortest distance between points
         double delta = Math.min(leftDelta, rightDelta);
         // Create s, add the points of PY that are within delta

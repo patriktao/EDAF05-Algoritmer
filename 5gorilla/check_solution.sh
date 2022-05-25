@@ -6,6 +6,7 @@
 # ./check_solution.sh ./a.out
 
 for f in data/**/*.in; do
+    start_time=`date +%s`
     echo $f
     pre=${f%.in}
     out=$pre.out
@@ -15,7 +16,9 @@ for f in data/**/*.in; do
     python3 output_validator/output_validator.py $f $out $ans > $verdict
     echo Checking solution...
     if grep -Fxq "success" $verdict
-    then 
+    then
+        end_time=`date +%s`
+        echo Execution time was `expr $end_time - $start_time` s. 
         echo Correct!
     else
         if grep -Fxq "uhoh" $verdict
