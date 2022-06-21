@@ -4,9 +4,9 @@ import java.util.*;
 public class Gorilla {
 
     private int[][] costs;
-    private String s1, s2;
+    private int[][] optTable;
     private HashMap<Character, Integer> chars;
-    private final static int delta = -4; // kostnaden
+    private final static int delta = -4; // kostnad
 
     public static void main(String[] args) {
         new Gorilla().run();
@@ -16,19 +16,26 @@ public class Gorilla {
         Parser p = new Parser(new Scanner(System.in));
         this.costs = p.costs;
         this.chars = p.chars;
+        /*
+         * För att veta hur lika två strängar är vill vi hitta den minsta kostnaden för
+         * att fixa två strängar så att de blir indentiska
+         */
         for (Query q : p.queries) {
-            this.s1 = q.s1;
-            this.s2 = q.s2;
-            System.out.println(calculateOpt(makeOptTable(s1, s2), s1.length(), s2.length()));
+            makeOptTable(q.s1, q.s2);
+            System.out.println(calculateOpt(q.s1, q.s2));
         }
     }
 
-    private int[][] makeOptTable(String s1, String s2) {
-        /* n:rows, m:columns */
+    private void makeOptTable(String s1, String s2) {
+        /*
+         * solved by saving the optimal scores for the solution of every subproblem
+         * instead of recalculating them
+         */
+        
+        // n:rows, m:columns
         int n = s1.length() + 1;
         int m = s2.length() + 1;
-        /* Vi gör en tabell där vi sparar alla optimerade värden */
-        int[][] optTable = new int[n][m];
+        this.optTable = new int[n][m]; // Vi sparar alla optimerade värden, följer pseudokoden för makeTable
         /* Då i = 0 */
         for (int i = 0; i < n; i++) {
             optTable[i][0] = delta * i;
@@ -41,24 +48,21 @@ public class Gorilla {
             for (int j = 1; j < m; j++) {
                 char c1 = s1.charAt(i - 1);
                 char c2 = s2.charAt(j - 1);
-                /*
-                 * Alpha: Kostnaden att byta från c1 till c2, detta går att hitta i vår
-                 * kostnadsmatris: costs
-                 */
-                int alpha = costs[chars.get(c1)][chars.get(c2)];
-                int opt1 = alpha + optTable[i - 1][j - 1];
-                /* s1 saknar tecken, konsumera tecken från s2 */
-                int opt2 = delta + optTable[i][j - 1];
-                /* s2 saknar tacken, konsumera tecken från s1 */
-                int opt3 = delta + optTable[i - 1][j];
-                /* Sparar mest optimala lösningen i tabellen */
-                optTable[i][j] = calcMax(opt1, opt2, opt3);
+                int alpha = costs[chars.get(c1)][chars.get(c2)]; // Kostnaden att byta från c1 till c2, finns i vår
+                                                                 // kostnadsmatris.
+                // Olika fallen
+                int opt1 = alpha + optTable[i - 1][j - 1]; // Mismatch: vi tar bort båda tecken och det kostar alpha.
+                int opt2 = delta + optTable[i][j - 1]; // s1 saknar tecknet, konsumera tecken från s2,
+                int opt3 = delta + optTable[i - 1][j]; // s2 saknar tecknet, konsumera tecken från s1
+                optTable[i][j] = calcMax(opt1, opt2, opt3); // Sparar mest optimala lösningen i tabellen
             }
         }
-        return optTable;
     }
 
-    private String calculateOpt(int[][] optTable, int i, int j) {
+    private String calculateOpt(String s1, String s2) {
+        int i = s1.length();
+        int j = s2.length();
+
         while (true) {
             /* Basfallen */
             if (i == 0) {
@@ -67,21 +71,20 @@ public class Gorilla {
             if (j == 0) {
                 return s1 + " " + "*".repeat(i) + s2;
             }
+
             /* Annars utvärderar vi de andra fallen */
             int alpha = costs[chars.get(s1.charAt(i - 1))][chars.get(s2.charAt(j - 1))];
-
-            /* Olika fallen */
-            int opt1 = optTable[i - 1][j - 1] + alpha; // använder vi alpha, konsumerar vi tecken från båda strängar
-            int opt2 = optTable[i][j - 1] + delta; // s1 saknar tecken, konsumera från s2
-            int opt3 = optTable[i - 1][j] + delta; // s2 saknar tecken, konsumera från s1
+            int opt1 = alpha + optTable[i - 1][j - 1]; // använder vi alpha, konsumerar vi tecken från båda strängar
+            int opt2 = delta + optTable[i][j - 1]; // s1 saknar tecken, konsumera från s2
+            int opt3 = delta + optTable[i - 1][j]; // s2 saknar tecken, konsumera från s1
 
             // Ifall en av fallen är sann minimerar vi endast en av strängarna s1 och s2
             if (opt2 > Math.max(opt1, opt3)) {
                 s1 = s1.substring(0, i) + "*" + s1.substring(i);
-                i++; // vi försäkrar att tecken i s1 inte minskas och bara s2 
+                i++; // vi försäkrar att tecken i s1 inte minskas och bara s2
             } else if (opt3 > opt1) {
                 s2 = s2.substring(0, j) + "*" + s2.substring(j);
-                j++; //försäkra att tecken i s2 inte minskas och bara s1.
+                j++; // försäkra att tecken i s2 inte minskas och bara s1.
             }
             i--;
             j--;
