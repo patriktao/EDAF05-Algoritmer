@@ -2,13 +2,21 @@ import java.util.*;
 
 public class Railway2 {
 
-    private List<ArrayList<Edge>> graph;
+    Node[] graph;
     private List<Edge> edges;
     private List<Integer> routesToRemove;
-    private int totalStudents;
+    private int C;
     private int totalNodes;
     private int totalRoutes;
     private int totalEdges;
+    private int maxFlow;
+
+    // C: Total students to transport
+    // Edge capacity: How many students it can carry
+    // Total Maximal Flow: needs to be higher than amount of people
+    // If cannot remove a route then start implementing the plan
+    // How many routes i can remove and what the maximal flow are after removing
+    // these routes
 
     public static void main(String[] args) {
         new Railway2().run();
@@ -17,37 +25,40 @@ public class Railway2 {
     public void run() {
         initialize();
         createGraph();
-        fordFulkerson();
+        removeRoutes();
     }
 
     private void initialize() {
         Parser p = new Parser(new Scanner(System.in));
-        edges = p.edges;
-        routesToRemove = p.routesToRemove;
-        totalStudents = p.totalStudents;
-        totalNodes = p.totalNodes;
-        totalRoutes = p.totalRoutes;
-        totalEdges = p.totalEdges;
+        this.edges = p.edges;
+        this.routesToRemove = p.routesToRemove;
+        this.C = p.totalStudents;
+        this.totalNodes = p.totalNodes;
+        this.totalRoutes = p.totalRoutes;
+        this.totalEdges = p.totalEdges;
+        this.graph = new Node[totalNodes];
     }
 
     public void createGraph() {
-        this.graph = new ArrayList<>();
+        // Creating Cities
         for (int i = 0; i < totalNodes; i++) {
-            graph.add(new ArrayList<>());
+            graph[i] = new Node();
         }
-        for (Edge e : edges) {
-            Edge to = new Edge(e.to, e.from, e.capacity);
-            // Residual
-            e.residual = to;
-            to.residual = e;
+        // Creating Routes
+        for (Edge a : edges) {
+            Edge b = new Edge(a.to, a.from, 0, 0);
+            // Set reverse path
+            a.setReverse(b);
+            b.setReverse(a);
             // Add to graph
-            graph.get(e.from).add(e);
-            graph.get(e.to).add(to);
+            graph[a.from].edges.add(a);
+            graph[a.to].edges.add(b);
         }
     }
 
     public void removeRoutes() {
         boolean working = true;
+        maxFlow = 0;
         int route = 0;
 
         /* En annan lösning med binärsökning */
@@ -73,64 +84,66 @@ public class Railway2 {
             Edge edgeToBeRemoved = edges.get(routesToRemove.get(0));
             edges.remove(edgeToBeRemoved);
             fordFulkerson();
+            System.out.println(2 + " " + maxFlow);
         }
     }
 
     public void fordFulkerson() {
-        int maxFlow = 0;
+        // source and destination
+        int s = 0;
+        int t = totalNodes - 1;
 
-        // Residual Graph
-        int rGraph[][] = new int[V][V];
+        // bfs
+        while (true) {
+            Edge[] pred = new Edge[totalNodes];
+            HashMap<Integer, Boolean> visited = new HashMap<>();
+            Queue<Node> q = new LinkedList<>();
 
-        // Hitta enkel väg
-        int pathFlow = bfs(0, totalNodes - 1);
+            // first node
+            q.add(graph[s]);
+            visited.put(s, true);
 
-    }
+            // base cond
+            if (s == t) {
+                return;
+            }
 
-    public int bfs(int s, int t) {
-        HashMap<Integer, Integer> pred = new HashMap<>();
-        HashMap<Integer, Boolean> visited = new HashMap<>();
-        Queue<Integer> q = new LinkedList<>();
-
-        // first node
-        q.add(s);
-        visited.put(s, true);
-
-        // base cond
-        if (s == t) {
-            return 0;
-        }
-
-        while (!q.isEmpty()) {
-            int v = q.poll();
-            for (Edge e : graph.get(v)) { // we go through all edges and find neighbours
-                int w = e.to; // w - neighbour node
-                if (visited.get(w) == null) { // if the neighbor node is not visited yet
-                    q.add(w); // we go to that node by adding to the queue
-                    visited.put(w, true); // it is now visited!
-                    pred.put(w, v); // now this new node and previous node are connected
-                    if (w == t) { // if that node is the string t we are looking for
-                        return getPathFlow(pred, t);
+            while (!q.isEmpty()) {
+                Node v = q.poll();
+                // we go through all edges and find neighbours
+                for (Edge e : v.edges) {
+                    // if the neighbor node is not visited yet
+                    if (visited.get(e.to) == null && e.to != s && e.capacity > e.flow) {
+                        visited.put(e.to, true);
+                        pred[e.to] = e;
+                        q.add(graph[e.to]);
                     }
                 }
             }
-        }
-        return 0;
-    }
 
-    private int getPathFlow(HashMap<Integer, Integer> pred, int n2) {
-        int path_flow = 0;
-        if (pred.get(n2) != null) {
-            for (int node = n2; node != -1; node = pred.get(node)) {
-                for (Edge e : graph.get(node)) {
-                    if (e.from == node && e.to == pred.get(node) && e.capacity >= totalStudents
-                            && path_flow > e.capacity) {
-                        path_flow = e.capacity;
-                    }
-                }
+            // Destination not reached, terminate algorithm and print maxFlow
+            if (pred[t] == null) {
+                break;
             }
+
+            // destination is reached
+            int pathFlow = Integer.MAX_VALUE;
+
+            // find maximum flow that can be pushed through the route, by finding minimum
+            // residual flow of every edge in the path
+            for (Edge e = pred[t]; e != null; e = pred[e.from]) {
+                pathFlow = Math.min(pathFlow, e.capacity - e.flow);
+            }
+
+            // Adds to flow values and subtracts from reverse flow values in path
+            for (Edge e = pred[t]; e != null; e = pred[e.from]) {
+                e.flow += pathFlow;
+                e.reverse.flow -= pathFlow;
+            }
+
+            maxFlow += pathFlow;
         }
-        return path_flow;
+
     }
 }
 
@@ -161,7 +174,7 @@ class Parser {
             int from = scan.nextInt();
             int to = scan.nextInt();
             int capacity = scan.nextInt();
-            edges.add(new Edge(from, to, capacity));
+            edges.add(new Edge(from, to, capacity, 0));
         }
         for (int i = 0; i < totalRoutes; i++) {
             int removeRouteIndex = scan.nextInt();
@@ -173,16 +186,25 @@ class Parser {
 
 class Edge {
     int to, from, capacity, flow;
-    Edge residual;
+    Edge reverse;
 
-    public Edge(int from, int to, int capacity) {
+    public Edge(int from, int to, int capacity, int flow) {
         this.from = from;
         this.to = to;
         this.capacity = capacity;
+        this.flow = flow;
         flow = 0;
+    }
+
+    public void setReverse(Edge e) {
+        reverse = e;
     }
 
     public String toString() {
         return from + "-" + to + ":" + capacity;
     }
+}
+
+class Node {
+    ArrayList<Edge> edges = new ArrayList<>();
 }
