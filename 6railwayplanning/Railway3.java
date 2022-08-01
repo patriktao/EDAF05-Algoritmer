@@ -1,15 +1,16 @@
 import java.util.*;
 
-public class Railway {
+public class Railway3 {
 
     private int graph[][];
     private List<Edge> edges;
     int[] routesToRemove;
     private int N;
     private int C;
+    private int M;
 
     public static void main(String[] args) {
-        new Railway().run();
+        new Railway3().run();
     }
 
     public void run() {
@@ -21,13 +22,13 @@ public class Railway {
         Parser p = new Parser(new Scanner(System.in));
         this.N = p.N; // total nodes
         this.C = p.C; // total students to transfer
+        this.M = p.M; // total routes
         this.edges = p.edges;
         this.routesToRemove = p.routesToRemove;
         this.graph = p.graph;
     }
 
     public boolean bfs(int[][] rGraph, int s, int t, int[] parent) {
-        boolean foundPath = false;
         // Keep track of visited nodes
         boolean[] visited = new boolean[N];
         for (int i = 0; i < N; ++i) {
@@ -45,17 +46,20 @@ public class Railway {
             Integer u = q.poll();
             for (int v = 0; v < N; v++) {
                 if (visited[v] == false && rGraph[u][v] > 0) {
+                    if (v == t) {
+                        parent[v] = u;
+                        return true;
+                    }
                     q.add(v);
                     parent[v] = u;
                     visited[v] = true;
                 }
             }
         }
-        foundPath = visited[t];
-        return foundPath;
+        return false;
     }
 
-    public int folkFulkerson(int s, int t) {
+    public int fordFulkerson(int[][] graph, int s, int t) {
         int u, v;
 
         int max_flow = 0; // No initial flow
@@ -94,31 +98,59 @@ public class Railway {
 
     public void removeRoute(int index) {
         Edge e = edges.get(index);
+        // System.out.println("Removing edge: " + e.toString());
         graph[e.u][e.v] = 0;
-        graph[e.v][e.u] = 0;
+        /*
+         * for (int u = 0; u < N; u++) {
+         * for (int v = 0; v < N; v++) {
+         * System.out.println(graph[u][v]);
+         * }
+         * }
+         */
     }
 
     public void solution() {
-        int maxFlow;
-        int removeCounter = 0;
+        int start = 0;
+        int end = M;
+        int ans = 0;
+        int newMaxFlow, mid;
 
-        // First run
-        maxFlow = folkFulkerson(0, N - 1);
+        while (start <= end) {
 
-        // Remove Routes
-        for (int i = 0; i < routesToRemove.length; i++) {
-            removeRoute(routesToRemove[i]);
-            int newFlow = folkFulkerson(0, N - 1);
-            if (newFlow >= C) {
-                maxFlow = Integer.min(maxFlow, newFlow);
-                removeCounter++;
-            } else { // Flödet är mindre än C
-                break;
+            mid = (start + end) / 2;
+            int[][] updatedNodeGraph = removeRoutesUntil(mid);
+            newMaxFlow = fordFulkerson(updatedNodeGraph, start, end);
+
+            // Try to remove more routes if maxFlow is >= nbrStudents
+            if (newMaxFlow >= C) {
+                start = mid + 1;
+            }
+            // Otherwise try to remove less routes if maxFlow < nbrStudents
+            else {
+                ans = mid;
+                end = mid - 1;
             }
         }
-        System.out.println(removeCounter + " " + maxFlow);
+        // Check what the maxFlow is once the max amount of routes are removed
+        int maxRemoved = ans - 1;
+        int maxFlow = fordFulkerson(removeRoutesUntil(maxRemoved), start, end);
+        System.out.println(maxRemoved + " " + maxFlow);
     }
 
+    private int[][] removeRoutesUntil(int index) {
+        int[][] updatedGraph = new int[N][N];
+        for (int u = 0; u < N; u++) {
+            for (int v = 0; v < N; v++) {
+                updatedGraph[u][v] = graph[u][v];
+            }
+        }
+        for (int i = 0; i < index; i++) {
+            Edge removedEdge = edges.get(i);
+            updatedGraph[removedEdge.u][removedEdge.v] = 0;
+            updatedGraph[removedEdge.v][removedEdge.u] = 0;
+        }
+        return updatedGraph;
+    }
 }
 
 class Edge {
