@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Railway {
+public class RailwaySlow {
 
     private int graph[][];
     private List<Edge> edges;
@@ -9,7 +9,7 @@ public class Railway {
     private int C;
 
     public static void main(String[] args) {
-        new Railway().run();
+        new RailwaySlow().run();
     }
 
     public void run() {
@@ -172,3 +172,22 @@ class Parser {
         }
     }
 }
+
+/* En annan lösning med binärsökning */
+
+/* Kopiera graf och ta bort en kant */
+
+/*
+ * En tom graf men lägger till en kant istället och hittar flödet för den grafen
+ */
+
+/*
+ * Ta bort alla kanter fram tills mitten och checkar om kapaciteten, en
+ * binörsäkning på när man tar bort kanter
+ */
+
+/*
+ * 100 kanter, lägga till 50 kanter om det är för lite flöde, gör en ny graf där
+ * vi gör 75 grader, om det är för mycket gör en ny iteration där vi gör 67
+ * grader tills det blir optimalt.
+ */

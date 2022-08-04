@@ -6,6 +6,7 @@
 # ./check_solution.sh ./a.out
 
 for f in data/**/*.in; do
+    start_time=`date +%s`
     echo $f
     pre=${f%.in}
     out=$pre.out
@@ -14,6 +15,8 @@ for f in data/**/*.in; do
     DIFF=$(diff -w $ans $out)
     if [ "$DIFF" == "" ]
     then 
+        end_time=`date +%s`
+        echo Execution time was `expr $end_time - $start_time` s. 
         echo Correct!
     else
         echo $f Incorrect!
