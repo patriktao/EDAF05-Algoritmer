@@ -31,27 +31,36 @@ public class ClosestPair {
     }
 
     public double closest(Point[] Px, Point[] Py, int size) {
+
         if (size <= 1) {
             return Double.MAX_VALUE;
         } else if (size == 2) {
             return getDistance(Px[0], Px[1]);
         }
+
         int mid = size / 2;
+
         // Divide Px to left and right
         Point[] Lx = Arrays.copyOfRange(Px, 0, mid);
         Point[] Rx = Arrays.copyOfRange(Px, mid + 1, size);
+
         // en lista likadan som x sorterad på y
         Point[] Ly = Arrays.copyOfRange(Px, 0, mid);
         Point[] Ry = Arrays.copyOfRange(Px, mid + 1, size);
+
         Arrays.sort(Ly, (p1, p2) -> p2.y - p1.y);
         Arrays.sort(Ry, (p1, p2) -> p2.y - p1.y);
+
         // Recursion: Find Minimum Distance From L and R Array
         double leftDelta = closest(Lx, Ly, Lx.length); 
         double rightDelta = closest(Rx, Ry, Rx.length);
+
         // Choose the shortest distance between points
         double delta = Math.min(leftDelta, rightDelta);
+
         // Create s, add the points of PY that are within delta
         ArrayList<Point> s = new ArrayList<>();
+
         double midX = Rx[0].x;
         for (Point p : Py) {
             double dist = Math.abs(midX - p.x);
@@ -59,6 +68,7 @@ public class ClosestPair {
                 s.add(p);
             }
         }
+        
         //Bruteforce
         for (int i = 0; i < s.size(); i++) {
             for (int j = i + 1; j < Math.min(s.size(), i + 4); j++) {

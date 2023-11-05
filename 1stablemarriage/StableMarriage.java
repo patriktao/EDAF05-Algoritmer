@@ -21,7 +21,7 @@ public class StableMarriage {
         }
     }
 
-    private PairList match() {
+    private PairList match() { // Gale-Shapley Algorithm
         PairList matchedPairs = new PairList();
 
         Queue<Integer> singleMen = new LinkedList<>();
@@ -32,6 +32,7 @@ public class StableMarriage {
         while (!singleMen.isEmpty()) {
             int m = singleMen.poll(); // 1 från position 0
             int w = manPref.get(m).remove(0);
+
 
             // this womans own preference list
             LinkedList<Integer> womanPref = womPref.get(w);
@@ -80,12 +81,16 @@ class Parser {
                 prefList.add(scan.nextInt());
             }
 
+            
             if (!womPref.containsKey(person)) {
                 womPref.put(person, invertList(prefList));
-            } else {
+            } else if (!manPref.containsKey(person)) {
                 manPref.put(person, prefList);
             }
         }
+        System.out.println(manPref);
+        System.out.println(womPref);
+
     }
 
     private LinkedList<Integer> invertList(List<Integer> list) {

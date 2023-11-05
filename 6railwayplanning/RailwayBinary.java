@@ -1,14 +1,12 @@
-import java.nio.file.Path;
 import java.util.*;
 
 public class RailwayBinary {
 
     private int graph[][];
-    private List<Edge> edges;
     Edge[] routesToRemove;
-    private int N;
-    private int C;
-    private int P;
+    private int totalNodes;
+    private int totalStudents;
+    private int totalRoutesToRemove;
     private int s, t;
 
     public static void main(String[] args) {
@@ -22,34 +20,34 @@ public class RailwayBinary {
 
     private void initialize() {
         Parser p = new Parser(new Scanner(System.in));
-        this.N = p.N; // total nodes
-        this.C = p.C; // total students to transfer
-        this.P = p.P; // total routes to remove
-        this.s = 0;
-        this.t = N - 1;
-        this.edges = p.edges;
+        this.totalNodes = p.totalNodes;
+        this.totalStudents = p.totalStudents;
+        this.totalRoutesToRemove = p.totalRoutesToRemove;
         this.routesToRemove = p.routesToRemove;
+        this.s = 0;
+        this.t = totalNodes - 1;
         this.graph = p.graph;
     }
 
     public void solution() {
         int start = 0;
-        int end = P;
+        int end = totalRoutesToRemove;
         int removeCounter = 0;
         int pathFlow, mid;
 
-        // Check how many routes we can remove before we find the max flow
-        while (start <= end) {
+        // Kollar hur många vägar vi kan ta bort innan vi hittar maximala flödet
+        while (start <= end) { // O(log(n)) worst case
             mid = (start + end) / 2;
 
             int[][] updatedNodeGraph = removeRoutesUntil(mid);
-            pathFlow = fordFulkerson(updatedNodeGraph);
 
-            // Try to remove more routes if maxFlow is >= C
-            if (pathFlow >= C) {
+            pathFlow = fordFulkerson(updatedNodeGraph); // O(E*f) där E antalet kanter och f maximala flödet
+
+            // Try to remove more routes if maxFlow is >= totalStudents
+            if (pathFlow >= totalStudents) {
                 start = mid + 1;
             }
-            // Otherwise try to remove less routes if maxFlow < C
+            // Otherwise try to remove less routes if maxFlow < totalStudents
             else {
                 removeCounter = mid;
                 end = mid - 1;
@@ -57,7 +55,8 @@ public class RailwayBinary {
         }
         // Check what the maxFlow is once the max amount of routes are removed
         int maxRemoved = removeCounter - 1; // Adjust index
-        int maxFlow = fordFulkerson(removeRoutesUntil(removeCounter - 1));
+        int[][] maxFlowGraph = removeRoutesUntil(maxRemoved);
+        int maxFlow = fordFulkerson(maxFlowGraph);
         System.out.println(maxRemoved + " " + maxFlow);
     }
 
@@ -84,34 +83,36 @@ public class RailwayBinary {
     public int fordFulkerson(int[][] graph) {
         int u, v;
 
-        int max_flow = 0; // No initial flow
+        // Initiala flödet genom grafen
+        int max_flow = 0;
 
-        int[][] rGraph = new int[N][N]; // Residual graph
-        for (u = 0; u < N; u++) {
-            for (v = 0; v < N; v++) {
+        // Residuala grafen⁄
+        int[][] rGraph = new int[this.totalNodes][this.totalNodes];
+        for (u = 0; u < this.totalNodes; u++) {
+            for (v = 0; v < this.totalNodes; v++) {
                 rGraph[u][v] = graph[u][v];
             }
         }
 
-        int[] parent = new int[N]; // Stores path
+        // Sparar path
+        int[] parent = new int[this.totalNodes];
 
-        // Folk Fulkerson
+        // Folk Fulkerson, true ifall vi hittar en väg genom grafen.
         while (bfs(rGraph, parent)) {
             int path_flow = Integer.MAX_VALUE;
 
-            // Hitta vägflödet
+            // Hittar vägflödet
             for (v = t; v != s; v = parent[v]) {
                 u = parent[v]; // u -> v
                 path_flow = Math.min(path_flow, rGraph[u][v]);
             }
 
-            // uppdatera residuala grafen
+            // uppdaterar residuala grafen
             for (v = t; v != s; v = parent[v]) {
                 u = parent[v]; // u -> v
                 rGraph[u][v] -= path_flow;
                 rGraph[v][u] += path_flow;
             }
-
             max_flow += path_flow;
         }
         return max_flow;
@@ -119,22 +120,22 @@ public class RailwayBinary {
 
     public boolean bfs(int[][] rGraph, int[] parent) {
         boolean foundPath = false;
-        // Keep track of visited nodes
-        boolean[] visited = new boolean[N];
-        for (int i = 0; i < N; ++i) {
+        // Håll koll på besökta noder
+        boolean[] visited = new boolean[this.totalNodes];
+        for (int i = 0; i < this.totalNodes; ++i) {
             visited[i] = false;
         }
-        // Queue for BFS
+        // Vi skapar en kö för de noderna vi ska besöka
         Queue<Integer> q = new LinkedList<>();
 
-        // Insert Source Node
+        // Vi lägger till Source-noden (den vi börjar att gå igenom)
         q.add(s);
         visited[s] = true;
         parent[s] = -1;
 
         while (q.isEmpty() == false) {
             Integer u = q.poll();
-            for (int v = 0; v < N; v++) {
+            for (int v = 0; v < this.totalNodes; v++) {
                 if (visited[v] == false && rGraph[u][v] > 0) {
                     q.add(v);
                     parent[v] = u;
@@ -142,7 +143,7 @@ public class RailwayBinary {
                 }
             }
         }
-        foundPath = visited[t];
+        foundPath = visited[t]; // Har vi en nod kopplad till den sista noden betyder det att det finns en path
         return foundPath;
     }
 
@@ -165,10 +166,10 @@ class Edge {
 class Parser {
     List<Edge> edges = new ArrayList<>();
     Edge[] routesToRemove;
-    int N = 0;
-    int M = 0;
-    int C = 0;
-    int P = 0;
+    int totalNodes = 0;
+    int totalRoutes = 0;
+    int totalStudents = 0;
+    int totalRoutesToRemove = 0;
     int graph[][];
 
     Parser(Scanner scan) {
@@ -176,14 +177,14 @@ class Parser {
     }
 
     private void run(Scanner scan) {
-        this.N = scan.nextInt();
-        this.M = scan.nextInt();
-        this.C = scan.nextInt();
-        this.P = scan.nextInt();
-        this.graph = new int[N][N];
+        this.totalNodes = scan.nextInt();
+        this.totalRoutes = scan.nextInt();
+        this.totalStudents = scan.nextInt();
+        this.totalRoutesToRemove = scan.nextInt();
+        this.graph = new int[totalNodes][totalNodes];
 
         // Creates initial graph
-        for (int i = 0; i < M; i++) {
+        for (int i = 0; i < totalRoutes; i++) {
             int u = scan.nextInt();
             int v = scan.nextInt();
             int capacity = scan.nextInt();
@@ -192,8 +193,8 @@ class Parser {
             edges.add(new Edge(u, v, capacity));
         }
         // All the routes to remove
-        routesToRemove = new Edge[P];
-        for (int i = 0; i < P; i++) {
+        routesToRemove = new Edge[totalRoutesToRemove];
+        for (int i = 0; i < totalRoutesToRemove; i++) {
             int removeRouteIndex = scan.nextInt();
             routesToRemove[i] = edges.get(removeRouteIndex);
         }

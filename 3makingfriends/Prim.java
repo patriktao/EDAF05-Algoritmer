@@ -1,14 +1,14 @@
 
 import java.util.*;
 
-public class MakingFriends {
+public class Prim {
 
     private List<Edge> edges;
     private List<Integer> nodes;
     private ArrayList<ArrayList<Edge>> graph = new ArrayList<>();
 
     public static void main(String[] args) {
-        new MakingFriends().run();
+        new Prim().run();
     }
 
     public void run() {
@@ -30,8 +30,8 @@ public class MakingFriends {
     }
 
     private void primsAlgorithm() {
-        HashSet<Integer> visited = new HashSet<>();
-        PriorityQueue<Edge> queue = new PriorityQueue<>((e1, e2) -> e1.weight - e2.weight);
+        Set<Integer> visited = new HashSet<>();
+        Queue<Edge> queue = new PriorityQueue<>((e1, e2) -> e1.weight - e2.weight);
         queue.addAll(graph.get(0)); // Lägger till alla kanter från nod 0.
         visited.add(queue.peek().from); // besöker första noden
         int distance = 0;

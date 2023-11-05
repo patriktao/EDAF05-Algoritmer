@@ -58,7 +58,7 @@ public class Gorilla {
             }
         }
     }
-
+    
     private String calculateOpt(String s1, String s2) {
         int i = s1.length();
         int j = s2.length();

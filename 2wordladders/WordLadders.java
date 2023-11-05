@@ -20,7 +20,8 @@ public class WordLadders {
 
         // Calculate shortest path between two words
         for (Pair p : pairs) {
-            int res = bfs(p.s1, p.s2);
+            /* int res = bfs(p.s1, p.s2); */
+            int res = dfs(p.s1, p.s2);
             if (res == -1) {
                 System.out.println("Impossible");
             } else {
@@ -44,7 +45,8 @@ public class WordLadders {
             for (int i = 0; i < 5; i++) {
                 // draw an arc only if the last four letters are present
                 String rep = sortedArray.substring(0, i) + sortedArray.substring(i + 1);
-                /* putin
+                /*
+                 * putin
                  * inptu
                  * i = 0: = nptu
                  * i = 1: i + ptu = iptu
@@ -66,7 +68,7 @@ public class WordLadders {
     private int getSize(HashMap<String, String> pred, String t) {
         int counter = -1;
         if (pred.get(t) != null) {
-            //start at string t and loop back each node to count the size of graph.
+            // start at string t and loop back each node to count the size of graph.
             for (String str = t; str != null; str = pred.get(str)) {
                 counter++;
             }
@@ -74,6 +76,8 @@ public class WordLadders {
         return counter;
     }
 
+
+    // BFS-Algorithm!
     public int bfs(String s, String t) {
         HashMap<String, String> pred = new HashMap<>();
         Map<String, Boolean> visited = new HashMap<>();
@@ -90,7 +94,7 @@ public class WordLadders {
                     visited.put(w, true);
                     q.add(w); // we go to that node by adding to the queue
                     pred.put(w, v); // now this new node and previous node are connected
-                    if (w.equals(t)) { // if that node is the string t we are looking for   
+                    if (w.equals(t)) { // if that node is the string t we are looking for
                         return getSize(pred, t);
                     }
                 }
