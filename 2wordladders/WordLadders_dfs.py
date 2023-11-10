@@ -26,7 +26,7 @@ class WordLadders:
     def run(self):
         for p1, p2 in self.pairs:
             res = self.depth_first_search(p1, p2)
-            if res == sys.maxsize:
+            if res == None:
                 print("Impossible")
             else:
                 print(res)
@@ -35,7 +35,7 @@ class WordLadders:
         for word in self.words:
             char_array = sorted(word)
             sorted_string = "".join(char_array)
-            for i in range(len(word)):
+            for i in range(5):
                 rep = sorted_string[:i] + sorted_string[i + 1 :]
                 self.neighborList.setdefault(rep, []).append(word)
 
@@ -50,21 +50,18 @@ class WordLadders:
         visited = set()
         return self.dfs(start, end, visited, 0)
 
-    def dfs(self, curr, end, visited, depth):
+    def dfs(self, curr, end, visited, distance):
         visited.add(curr)
-        
         if curr == end:
-            return depth
-        
-        min_layer = sys.maxsize
+            return distance
 
         for neighbor in self.getNeighborList(curr):
             if neighbor not in visited:
-                layer = self.dfs(neighbor, end, visited, depth+1)
-                if layer != -1:
-                    min_layer = min(min_layer, layer)
-                
-        return min_layer
+                res = self.dfs(neighbor, end, visited, distance + 1)
+                if res is not None:
+                    return res
+
+        return None
 
 
 if __name__ == "__main__":
